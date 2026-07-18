@@ -61,6 +61,7 @@ export default function Home() {
   const [query, setQuery] = useState("");
   const [lane, setLane] = useState("All lanes");
   const [selected, setSelected] = useState<Project | null>(null);
+  const [routeProject, setRouteProject] = useState<Project | null>(null);
   const lanes = ["All lanes", ...Array.from(new Set(projects.map((p) => p.lane)))];
   const filtered = useMemo(() => projects.filter((p) => {
     const haystack = `${p.name} ${p.summary} ${p.tags.join(" ")} ${p.lane}`.toLowerCase();
@@ -72,7 +73,7 @@ export default function Home() {
       <aside className="sidebar">
         <div className="brand-mark"><span>A</span></div>
         <div className="brand-copy"><strong>Aurelia</strong><small>PHAROS KNOWLEDGE ATLAS</small></div>
-        <nav>{nav.map((item) => <button key={item} className={active === item ? "active" : ""} onClick={() => setActive(item)}><span className="nav-dot" />{item}</button>)}</nav>
+        <nav>{nav.map((item) => <button key={item} className={active === item ? "active" : ""} onClick={() => { setActive(item); setRouteProject(null); }}><span className="nav-dot" />{item}</button>)}</nav>
         <div className="side-note">
           <span className="eyebrow">KNOWLEDGE KEEPER</span>
           <div className="worker"><div className="worker-orbit">½</div><div><b>帆½</b><small>Company AI Worker</small></div></div>
@@ -111,10 +112,32 @@ export default function Home() {
           <section className="conversation-list compact">{conversations.slice(0, 5).map((c, i) => <article key={c[0]}><span className="index">{String(i + 1).padStart(2, "0")}</span><div><h3>{c[0]}</h3><p>{c[3]}</p></div><span className="pill">{c[1]}</span><time>{c[2]}</time><b>↗</b></article>)}</section>
         </div>}
 
-        {active === "Projects" && <div className="page subpage">
+        {active === "Projects" && !routeProject && <div className="page subpage">
           <div className="title-row"><div><span className="eyebrow">PROJECT ATLAS</span><h1>Fourteen active worlds.</h1><p>每个项目是一段设计实践，也是一条可以被其他 Agent 重新进入的知识路径。</p></div><div className="big-number">14</div></div>
           <div className="filters"><div className="filter-search">⌕ <input placeholder="Filter projects…" value={query} onChange={(e) => setQuery(e.target.value)}/></div><select value={lane} onChange={(e) => setLane(e.target.value)}>{lanes.map((x) => <option key={x}>{x}</option>)}</select><span>{filtered.length} visible</span></div>
           <section className="project-grid">{filtered.map((p) => <button className="project-card" key={p.name} onClick={() => setSelected(p)}><div className={`project-visual ${p.tone}`}><span>{p.name.slice(0, 2).toUpperCase()}</span><i style={{width: `${p.activity}%`}} /></div><div className="project-body"><span className="eyebrow">{p.lane}</span><h2>{p.name}</h2><p>{p.summary}</p><div>{p.tags.map((t) => <small key={t}>{t}</small>)}</div></div><b>↗</b></button>)}</section>
+        </div>}
+
+        {active === "Projects" && routeProject && <div className="page subpage route-page">
+          <button className="route-back" onClick={() => setRouteProject(null)}>← Back to Project Atlas</button>
+          <section className="route-hero">
+            <div className="route-hero-copy"><span className="eyebrow">PROJECT KNOWLEDGE ROUTE · {routeProject.lane.toUpperCase()}</span><h1>{routeProject.name}</h1><p>{routeProject.summary}</p><div className="route-tags">{routeProject.tags.map((tag) => <span key={tag}>{tag}</span>)}</div></div>
+            <div className={`route-emblem ${routeProject.tone}`}><span>{routeProject.name.slice(0, 2).toUpperCase()}</span><i /><i /><i /></div>
+          </section>
+          <section className="route-meta">
+            <div><span>SOURCE</span><b>{routeProject.path}</b></div><div><span>KNOWLEDGE LANE</span><b>{routeProject.lane}</b></div><div><span>ACTIVITY SIGNAL</span><b>{routeProject.activity}% indexed</b></div><div><span>OWNERSHIP</span><b>Yangfan · 帆½</b></div>
+          </section>
+          <div className="route-layout">
+            <section className="route-timeline">
+              <div className="section-head"><div><span className="eyebrow">KNOWLEDGE JOURNEY</span><h2>From source to collective memory</h2></div></div>
+              {[{n:"01",title:"Source material",text:`原始项目文件、设计资产与交付记录保存在 ${routeProject.path}。`,type:"LOCAL SOURCE"},{n:"02",title:"Design reasoning",text:`与 ${routeProject.tags.join("、")} 相关的对话被 Pinakes 归档为可追溯的设计判断。`,type:"CODEX CONVERSATIONS"},{n:"03",title:"Domain knowledge",text:`知识被映射到 ${routeProject.lane}，并使用统一领域标签进入 Aurelia 检索。`,type:"AURELIA INDEX"},{n:"04",title:"Team federation",text:"经确认可共享的摘要、向量与引用提交到 Pharos，供团队 AI Workers 联邦检索。",type:"PHAROS"}].map((step) => <article key={step.n}><span>{step.n}</span><div><small>{step.type}</small><h3>{step.title}</h3><p>{step.text}</p></div></article>)}
+            </section>
+            <aside className="route-aside">
+              <span className="eyebrow">RELATED KNOWLEDGE</span><h2>Connected routes</h2>
+              {projects.filter((p) => p.name !== routeProject.name && (p.lane === routeProject.lane || p.tags.some((t) => routeProject.tags.includes(t)))).slice(0,3).map((p) => <button key={p.name} onClick={() => setRouteProject(p)}><i className={p.tone}>{p.name.slice(0,2).toUpperCase()}</i><span><b>{p.name}</b><small>{p.lane}</small></span><strong>→</strong></button>)}
+              <div className="route-note"><span>PINAKES ID</span><code>yangfan.{routeProject.lane.toLowerCase().replaceAll(" ", "-")}.project.{routeProject.name.toLowerCase().replaceAll(" ", "-")}</code><p>本知识路径遵循 Aurelia 联邦命名与检索规范。</p></div>
+            </aside>
+          </div>
         </div>}
 
         {active === "Conversations" && <div className="page subpage">
@@ -146,7 +169,7 @@ export default function Home() {
         </div>}
       </section>
 
-      {selected && <div className="drawer-backdrop" onClick={() => setSelected(null)}><aside className="drawer" onClick={(e) => e.stopPropagation()}><button className="close" onClick={() => setSelected(null)}>×</button><span className="eyebrow">{selected.lane}</span><h2>{selected.name}</h2><p>{selected.summary}</p><div className={`drawer-visual ${selected.tone}`}><span>{selected.name.slice(0, 2).toUpperCase()}</span></div><dl><div><dt>Knowledge path</dt><dd>{selected.path}</dd></div><div><dt>Activity signal</dt><dd>{selected.activity}%</dd></div><div><dt>Indexed tags</dt><dd>{selected.tags.join(" · ")}</dd></div></dl><button className="primary">Open knowledge route →</button></aside></div>}
+      {selected && <div className="drawer-backdrop" onClick={() => setSelected(null)}><aside className="drawer" onClick={(e) => e.stopPropagation()}><button className="close" onClick={() => setSelected(null)}>×</button><span className="eyebrow">{selected.lane}</span><h2>{selected.name}</h2><p>{selected.summary}</p><div className={`drawer-visual ${selected.tone}`}><span>{selected.name.slice(0, 2).toUpperCase()}</span></div><dl><div><dt>Knowledge path</dt><dd>{selected.path}</dd></div><div><dt>Activity signal</dt><dd>{selected.activity}%</dd></div><div><dt>Indexed tags</dt><dd>{selected.tags.join(" · ")}</dd></div></dl><button className="primary" onClick={() => { setRouteProject(selected); setSelected(null); window.scrollTo({ top: 0, behavior: "smooth" }); }}>Open knowledge route →</button></aside></div>}
     </main>
   );
 }
