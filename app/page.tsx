@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import KnowledgeBrowser from "./KnowledgeBrowser";
 
 type Project = {
   name: string;
@@ -13,6 +14,7 @@ type Project = {
 };
 
 const projects: Project[] = [
+  { name: "Driving HMI / SR Knowledge Base", path: "Private D1 / driving_hmi_rag", lane: "Automotive HMI", summary: "智驾术语、五家车企公开参考与 Unity SR 项目规则组成的可追溯私密知识库。", tags: ["ADAS", "SR", "RAG"], activity: 100, tone: "orange" },
   { name: "Pharos", path: "Weekly Report / Pharos", lane: "AI Collective", summary: "以亚历山大灯塔为中心的多 Agent 聚合体与三维岛屿世界。", tags: ["Agents", "Three.js", "Organization"], activity: 96, tone: "amber" },
   { name: "Teamwork HMI Design", path: "Documents / Teamwork_HMI_Design", lane: "Design Organization", summary: "Unity HMI 团队领域阵型、项目担当、实时任务与 AI Worker 协作协议。", tags: ["HMI", "DDD", "Management"], activity: 94, tone: "olive" },
   { name: "Spatial AIOS", path: "Documents / Spatial AIOS", lane: "Embodied Mobility", summary: "从 SR 应用走向空间感知、空间记忆与具身智能汽车操作系统。", tags: ["AIOS", "Spatial Memory", "Cockpit"], activity: 90, tone: "blue" },
@@ -30,6 +32,7 @@ const projects: Project[] = [
 ];
 
 const conversations = [
+  ["Driving HMI / SR 知识库导入", "Automotive HMI", "8月10日", "117 片段 · 8 来源 · 6 组检索验证"],
   ["Aurelia · 构建 Codex LLM Wiki", "Knowledge Architecture", "今天", "14 项目 · 43 对话 · 29 领域"],
   ["Pharos 岛与 AI Worker 聚合体", "Agent Collective", "今天", "三维岛屿 · 灯塔 · 20+ Worker"],
   ["项目工作担当分析", "Design Organization", "7月12日", "DDD 阵型 · 负载 · 协作"],
@@ -79,7 +82,7 @@ export default function Home() {
           <div className="worker"><div className="worker-orbit">½</div><div><b>帆½</b><small>Company AI Worker</small></div></div>
           <p>连接个人工作、团队领域与 Pharos 集体智能。</p>
         </div>
-        <div className="sync"><i /> Indexed · 2026.07.13</div>
+        <div className="sync"><i /> Indexed · 2026.08.10</div>
       </aside>
 
       <section className="content">
@@ -99,10 +102,10 @@ export default function Home() {
           </section>
 
           <section className="metrics">
-            <div><strong>14</strong><span>Codex Projects</span><small>Across 8 knowledge lanes</small></div>
-            <div><strong>43</strong><span>Recent Conversations</span><small>Indexed by Pinakes</small></div>
+            <div><strong>15</strong><span>Codex Projects</span><small>Across 8 knowledge lanes</small></div>
+            <div><strong>160</strong><span>Knowledge Units</span><small>43 conversations · 117 chunks</small></div>
             <div><strong>29</strong><span>Team Domains</span><small>DD · DS · DM formation</small></div>
-            <div><strong>3</strong><span>Knowledge Layers</span><small>Human · Agent · Collective</small></div>
+            <div><strong>8</strong><span>Driving HMI Sources</span><small>Private · traceable · governed</small></div>
           </section>
 
           <div className="section-head"><div><span className="eyebrow">KNOWLEDGE ROUTES</span><h2>Paths through your practice</h2></div><button onClick={() => setActive("Domains")}>View domain formation →</button></div>
@@ -113,7 +116,7 @@ export default function Home() {
         </div>}
 
         {active === "Projects" && !routeProject && <div className="page subpage">
-          <div className="title-row"><div><span className="eyebrow">PROJECT ATLAS</span><h1>Fourteen active worlds.</h1><p>每个项目是一段设计实践，也是一条可以被其他 Agent 重新进入的知识路径。</p></div><div className="big-number">14</div></div>
+          <div className="title-row"><div><span className="eyebrow">PROJECT ATLAS</span><h1>Fifteen active worlds.</h1><p>每个项目是一段设计实践，也是一条可以被其他 Agent 重新进入的知识路径。</p></div><div className="big-number">15</div></div>
           <div className="filters"><div className="filter-search">⌕ <input placeholder="Filter projects…" value={query} onChange={(e) => setQuery(e.target.value)}/></div><select value={lane} onChange={(e) => setLane(e.target.value)}>{lanes.map((x) => <option key={x}>{x}</option>)}</select><span>{filtered.length} visible</span></div>
           <section className="project-grid">{filtered.map((p) => <button className="project-card" key={p.name} onClick={() => setSelected(p)}><div className={`project-visual ${p.tone}`}><span>{p.name.slice(0, 2).toUpperCase()}</span><i style={{width: `${p.activity}%`}} /></div><div className="project-body"><span className="eyebrow">{p.lane}</span><h2>{p.name}</h2><p>{p.summary}</p><div>{p.tags.map((t) => <small key={t}>{t}</small>)}</div></div><b>↗</b></button>)}</section>
         </div>}
@@ -127,7 +130,7 @@ export default function Home() {
           <section className="route-meta">
             <div><span>SOURCE</span><b>{routeProject.path}</b></div><div><span>KNOWLEDGE LANE</span><b>{routeProject.lane}</b></div><div><span>ACTIVITY SIGNAL</span><b>{routeProject.activity}% indexed</b></div><div><span>OWNERSHIP</span><b>Yangfan · 帆½</b></div>
           </section>
-          <div className="route-layout">
+          {routeProject.name === "Driving HMI / SR Knowledge Base" ? <KnowledgeBrowser /> : <div className="route-layout">
             <section className="route-timeline">
               <div className="section-head"><div><span className="eyebrow">KNOWLEDGE JOURNEY</span><h2>From source to collective memory</h2></div></div>
               {[{n:"01",title:"Source material",text:`原始项目文件、设计资产与交付记录保存在 ${routeProject.path}。`,type:"LOCAL SOURCE"},{n:"02",title:"Design reasoning",text:`与 ${routeProject.tags.join("、")} 相关的对话被 Pinakes 归档为可追溯的设计判断。`,type:"CODEX CONVERSATIONS"},{n:"03",title:"Domain knowledge",text:`知识被映射到 ${routeProject.lane}，并使用统一领域标签进入 Aurelia 检索。`,type:"AURELIA INDEX"},{n:"04",title:"Team federation",text:"经确认可共享的摘要、向量与引用提交到 Pharos，供团队 AI Workers 联邦检索。",type:"PHAROS"}].map((step) => <article key={step.n}><span>{step.n}</span><div><small>{step.type}</small><h3>{step.title}</h3><p>{step.text}</p></div></article>)}
@@ -137,7 +140,7 @@ export default function Home() {
               {projects.filter((p) => p.name !== routeProject.name && (p.lane === routeProject.lane || p.tags.some((t) => routeProject.tags.includes(t)))).slice(0,3).map((p) => <button key={p.name} onClick={() => setRouteProject(p)}><i className={p.tone}>{p.name.slice(0,2).toUpperCase()}</i><span><b>{p.name}</b><small>{p.lane}</small></span><strong>→</strong></button>)}
               <div className="route-note"><span>PINAKES ID</span><code>yangfan.{routeProject.lane.toLowerCase().replaceAll(" ", "-")}.project.{routeProject.name.toLowerCase().replaceAll(" ", "-")}</code><p>本知识路径遵循 Aurelia 联邦命名与检索规范。</p></div>
             </aside>
-          </div>
+          </div>}
         </div>}
 
         {active === "Conversations" && <div className="page subpage">
